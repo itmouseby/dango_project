@@ -1,0 +1,63 @@
+{% extends "base_generic.html" %}
+{% block content %}
+<h1>Название книги: {{ book.title }}</h1>
+<p><strong>Жaнp:</strong> {{ book.genre }}</p>
+<p><strong>Аннотация:</strong> {{ book.summary }}</p>
+<p><strong>ISBN:</strong> {{ book.isbn }}</p>
+<p><strong>Язык:</strong> {{ book.language }}</p>
+    {% for author in book.author.all %}
+    <p><strong>Aвтop:</strong>
+        <a href="">{{ author.first_name }}
+                   {{author.last_name}}</a></p>
+    {% endfor %}
+
+
+<div style="margin-left:20px;
+            margin-top:20px">
+    <h4>Количество экземпляров книг в БД {{book.bookinstance_set.all.count}}</h4>
+    {% for copy in book.bookinstance_set.all %}
+        <hr><p class="{% if copy.status == 1 %} text-success
+                    {% elif copy.status == 2 %} text-danger
+                    {% else %} text-warning
+                    {% endif %}"> {{ copy.get_status_display }}</p>
+        <p><strong>Издaтeльcтвo:</strong> {{copy.imprint}}</p>
+
+        <p class="text-muted"><strong>Инвeнтapный нoмep:</strong> {{copy.id}}</p>
+        <p><strong>Cтaтyc экземпляра книги в БД:</strong> {{copy.status}}</p>
+             <!-- Проверяем авторизован ли юзер-->
+           {% if user.is_authenticated %}
+            <!-- Сравниваем ид статуса с цифрой, так как по другому я не нашел как сравнивать для отображения кнопки-->
+            {% if copy.status.id == 1 %}
+            <!-- Создаем форму с пост запросом и именем урл к котороуму будет проходить запрос-->
+                <form method="POST" action="{% url 'order1' %}">
+                    {% csrf_token %}
+                    <p>Вы можете заказать этот экземпляр книги {{copy}}</p>
+                    <!-- Создаем скрыте поля, другого варината не придумал), в скрытых полях будет хранится значение-->
+                    <input name="id" type="hidden" value="{{copy.id}}" >
+                    <input name="userid" type="hidden" value="{{user.id}}" >
+
+
+                    <button type="submit">Получить книгу</button>
+                    <span>дата сдачи книги </span>
+                    <!-- Создаем поле даты возврата required говорит что обязательно к заполнению, что бь небыло ошибки-->
+                    <input name="todate" type="date" required>
+                </form>
+            {% endif %}
+        {% endif%}
+
+
+
+
+
+
+
+
+
+
+
+    {% endfor %}
+</div>
+{% endblock %}
+<p><strong>Aвтop:</strong><a href="">{{ author.first_name }}
+        {{author.last_name}}</a>
+</p>
